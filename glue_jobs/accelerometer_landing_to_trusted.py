@@ -14,7 +14,7 @@ job.init(args["JOB_NAME"], args)
 
 # Script generated for node Accelerometer Landing
 AccelerometerLanding_node1698102418255 = glueContext.create_dynamic_frame.from_catalog(
-    database="esron",
+    database="stedi",
     table_name="accelerometer_landing",
     transformation_ctx="AccelerometerLanding_node1698102418255",
 )
@@ -53,16 +53,18 @@ DropCustomerFields_node1698120152442 = DropFields.apply(
 )
 
 # Script generated for node Amazon S3
-AmazonS3_node1698102585564 = glueContext.write_dynamic_frame.from_options(
-    frame=DropCustomerFields_node1698120152442,
+AmazonS3_node1698102585564 = glueContext.getSink(
+    path="s3://esron-lake-house/accelerometer/trusted/",
     connection_type="s3",
-    format="json",
-    connection_options={
-        "path": "s3://esron-lake-house/accelerometer/trusted/",
-        "compression": "gzip",
-        "partitionKeys": [],
-    },
+    updateBehavior="LOG",
+    partitionKeys=[],
+    compression="gzip",
+    enableUpdateCatalog=True,
     transformation_ctx="AmazonS3_node1698102585564",
 )
-
+AmazonS3_node1698102585564.setCatalogInfo(
+    catalogDatabase="stedi", catalogTableName="accelerometer_trusted"
+)
+AmazonS3_node1698102585564.setFormat("json")
+AmazonS3_node1698102585564.writeFrame(DropCustomerFields_node1698120152442)
 job.commit()

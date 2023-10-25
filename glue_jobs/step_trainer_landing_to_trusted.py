@@ -44,7 +44,6 @@ select
 from step_trainer_landing as stl
 join customer_curated as cc
 on cc.serialnumber = stl.serialnumber
-
 """
 Sharewithresearch_node1698188898081 = sparkSqlQuery(
     glueContext,
@@ -57,16 +56,18 @@ Sharewithresearch_node1698188898081 = sparkSqlQuery(
 )
 
 # Script generated for node Step Trainer Trusted
-StepTrainerTrusted_node1698189078544 = glueContext.write_dynamic_frame.from_options(
-    frame=Sharewithresearch_node1698188898081,
+StepTrainerTrusted_node1698189078544 = glueContext.getSink(
+    path="s3://esron-lake-house/step_trainer/trusted/",
     connection_type="s3",
-    format="json",
-    connection_options={
-        "path": "s3://esron-lake-house/step_trainer/trusted/",
-        "compression": "gzip",
-        "partitionKeys": [],
-    },
+    updateBehavior="LOG",
+    partitionKeys=[],
+    compression="gzip",
+    enableUpdateCatalog=True,
     transformation_ctx="StepTrainerTrusted_node1698189078544",
 )
-
+StepTrainerTrusted_node1698189078544.setCatalogInfo(
+    catalogDatabase="stedi", catalogTableName="step_trainer_trusted"
+)
+StepTrainerTrusted_node1698189078544.setFormat("json")
+StepTrainerTrusted_node1698189078544.writeFrame(Sharewithresearch_node1698188898081)
 job.commit()

@@ -21,18 +21,18 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args["JOB_NAME"], args)
 
-# Script generated for node Step Trainer Trusted
-StepTrainerTrusted_node1698189629548 = glueContext.create_dynamic_frame.from_catalog(
-    database="stedi",
-    table_name="step_trainer_trusted",
-    transformation_ctx="StepTrainerTrusted_node1698189629548",
-)
-
 # Script generated for node Accelerometer Trusted
 AccelerometerTrusted_node1698189629878 = glueContext.create_dynamic_frame.from_catalog(
     database="stedi",
     table_name="accelerometer_trusted",
     transformation_ctx="AccelerometerTrusted_node1698189629878",
+)
+
+# Script generated for node Step Trainer Trusted
+StepTrainerTrusted_node1698189629548 = glueContext.create_dynamic_frame.from_catalog(
+    database="stedi",
+    table_name="step_trainer_trusted",
+    transformation_ctx="StepTrainerTrusted_node1698189629548",
 )
 
 # Script generated for node SQL Query
@@ -59,16 +59,18 @@ SQLQuery_node1698189634338 = sparkSqlQuery(
 )
 
 # Script generated for node Machine Learning Curated
-MachineLearningCurated_node1698189635540 = glueContext.write_dynamic_frame.from_options(
-    frame=SQLQuery_node1698189634338,
+MachineLearningCurated_node1698189635540 = glueContext.getSink(
+    path="s3://esron-lake-house/step_trainer/curated/",
     connection_type="s3",
-    format="json",
-    connection_options={
-        "path": "s3://esron-lake-house/step_trainer/curated/",
-        "compression": "gzip",
-        "partitionKeys": [],
-    },
+    updateBehavior="LOG",
+    partitionKeys=[],
+    compression="gzip",
+    enableUpdateCatalog=True,
     transformation_ctx="MachineLearningCurated_node1698189635540",
 )
-
+MachineLearningCurated_node1698189635540.setCatalogInfo(
+    catalogDatabase="stedi", catalogTableName="machine_learning_curated"
+)
+MachineLearningCurated_node1698189635540.setFormat("json")
+MachineLearningCurated_node1698189635540.writeFrame(SQLQuery_node1698189634338)
 job.commit()
